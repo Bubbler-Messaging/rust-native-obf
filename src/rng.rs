@@ -32,7 +32,7 @@ pub const GLOBAL_SEED: u64 = match option_env!("NATIVE_OBF_SEED") {
 #[macro_export]
 macro_rules! ct_rand {
     ($ty:ident $(, $seed:expr)*) => {{
-        const _RND: $ty = $crate::rng::cast_rand!($ty, 
+        const _RND: $ty = $crate::cast_rand!($ty,
             $crate::rng::gen_entropy(concat!(file!(), ":", line!(), ":", column!() $(, ":", $seed)*)));
         _RND
     }};
