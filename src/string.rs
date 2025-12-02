@@ -35,30 +35,12 @@ pub const fn encrypt_bytes<const N: usize>(data: &[u8], keys: &[u8; N]) -> [u8; 
 
 pub fn decrypt_bytes<const N: usize>(data: &[u8; N], keys: &[u8; N]) -> [u8; N] {
     let mut result = [0u8; N];
-    let mut i = 0;
     unsafe {
         let src = data.as_ptr();
         let dst = result.as_mut_ptr();
-        #[cfg(target_pointer_width = "64")]
-        while i + 8 <= N {
-            let enc = read_volatile(src.add(i) as *const u64);
-            let key = u64::from_ne_bytes([
-                keys[i], keys[i+1], keys[i+2], keys[i+3],
-                keys[i+4], keys[i+5], keys[i+6], keys[i+7],
-            ]);
-            write(dst.add(i) as *mut u64, enc ^ key);
-            i += 8;
-        }
-        while i + 4 <= N {
-            let enc = read_volatile(src.add(i) as *const u32);
-            let key = u32::from_ne_bytes([keys[i], keys[i+1], keys[i+2], keys[i+3]]);
-            write(dst.add(i) as *mut u32, enc ^ key);
-            i += 4;
-        }
-        while i < N {
+        for i in 0..N {
             let enc = read_volatile(src.add(i));
             write(dst.add(i), enc ^ keys[i]);
-            i += 1;
         }
     }
     result
